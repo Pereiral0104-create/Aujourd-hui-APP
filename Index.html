@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Aujourd'hui">
+<meta name="theme-color" content="#6B5B4E">
+<title>Aujourd'hui — Réservations</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--cr:#F7F3ED;--ta:#9C8B7A;--or:#C8A96E;--br:#6B5B4E;--dk:#3a2e28;--wh:#FEFCF9;--bo:rgba(156,139,122,0.2);--gr:#4a7c59;--rd:#c0392b;--bg:#e8e2db}
+body{background:var(--bg);font-family:'Jost',sans-serif;min-height:100vh;min-height:-webkit-fill-available;overflow-x:hidden}
+.app{max-width:900px;margin:0 auto;padding:20px 16px 100px}
+
+/* HEADER */
+.hd{text-align:center;padding:24px 0 20px}
+.hd-mono{font-family:‘Cormorant Garamond’,serif;font-size:48px;font-weight:300;color:var(–br);letter-spacing:-2px;line-height:1}
+.hd-mono span{color:var(–or)}
+.hd-sub{font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(–ta);margin-top:4px}
+.hd-line{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0}
+.hd-line .l{height:1px;width:40px;background:linear-gradient(to right,transparent,var(–or))}
+.hd-line .lr{background:linear-gradient(to left,transparent,var(–or))}
+.hd-line .d{width:4px;height:4px;background:var(–or);transform:rotate(45deg)}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(–br);display:flex;z-index:50;padding-bottom:env(safe-area-inset-bottom)}
+.bnav-tab{flex:1;padding:14px 0 10px;text-align:center;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(247,243,237,.5);cursor:pointer;border:none;background:none;font-family:‘Jost’,sans-serif;display:flex;flex-direction:column;align-items:center;gap:4px;transition:color .2s}
+.bnav-tab.active{color:var(–or)}
+.bnav-icon{font-size:20px;line-height:1}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat{background:var(–cr);padding:16px;position:relative}
+.stat::before{content:’’;position:absolute;inset:6px;border:1px solid rgba(200,169,110,0.15);pointer-events:none}
+.stat-v{font-family:‘Cormorant Garamond’,serif;font-size:28px;font-weight:300;color:var(–br);line-height:1}
+.stat-v sup{font-size:13px;color:var(–or)}
+.stat-l{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(–ta);margin-top:4px}
+.stat-sub{font-size:10px;color:var(–ta);margin-top:2px;font-style:italic}
+
+/* BANNER */
+.banner{background:var(–br);padding:16px 20px;margin-bottom:20px}
+.ban-t{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(–or);margin-bottom:4px}
+.ban-v{font-family:‘Cormorant Garamond’,serif;font-size:22px;font-weight:300;color:var(–cr)}
+.ban-bar{height:2px;background:rgba(255,255,255,0.1);margin:10px 0 4px}
+.ban-fill{height:100%;background:linear-gradient(to right,var(–ta),var(–or));transition:width 1s ease}
+.ban-charges{font-size:10px;color:rgba(247,243,237,.4);letter-spacing:1px}
+
+/* SECTION HEADER */
+.sec-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.sec-title{font-family:‘Cormorant Garamond’,serif;font-size:20px;color:var(–br)}
+.btn-add{background:var(–br);color:var(–cr);border:none;padding:10px 18px;font-family:‘Jost’,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s;border-radius:0}
+.btn-add:active{background:var(–or)}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-btn{background:none;border:1px solid var(–bo);color:var(–ta);padding:5px 12px;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:‘Jost’,sans-serif;white-space:nowrap;flex-shrink:0}
+.filter-btn.active{background:var(–br);color:var(–cr);border-color:var(–br)}
+
+/* RESA CARD */
+.list{display:flex;flex-direction:column;gap:2px}
+.empty-state{background:var(–cr);padding:40px;text-align:center;color:var(–ta);font-style:italic;font-family:‘Cormorant Garamond’,serif;font-size:18px}
+.resa{background:var(–cr);display:grid;grid-template-columns:4px 1fr auto;align-items:stretch;transition:opacity .2s}
+.resa-stripe{background:var(–or)}
+.resa-main{padding:14px 16px}
+.resa-client{font-family:‘Cormorant Garamond’,serif;font-size:19px;color:var(–br)}
+.resa-meta{font-size:11px;color:var(–ta);margin-top:2px}
+.resa-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.tag{font-size:9px;padding:2px 7px;letter-spacing:1px;text-transform:uppercase}
+.tg-f{background:rgba(200,169,110,0.15);color:var(–br)}
+.tg-u{background:rgba(156,139,122,0.1);color:var(–ta)}
+.tg-e{background:rgba(74,124,89,0.12);color:var(–gr)}
+.resa-right{padding:14px 12px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:2px;border-left:1px solid var(–bo);min-width:90px}
+.resa-tot{font-family:‘Cormorant Garamond’,serif;font-size:20px;color:var(–br);font-weight:300}
+.resa-benef{font-size:10px;color:var(–gr)}
+.resa-ac{font-size:9px;color:var(–ta)}
+.ac-ok{color:var(–gr)}
+.resa-actions{display:flex;gap:6px;margin-top:8px}
+.btn-sm{background:none;border:1px solid var(–bo);color:var(–ta);padding:4px 10px;font-size:9px;cursor:pointer;font-family:‘Jost’,sans-serif;letter-spacing:1px;text-transform:uppercase}
+
+/* CALENDAR */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-month{font-family:‘Cormorant Garamond’,serif;font-size:26px;color:var(–br);font-weight:300}
+.cal-btn{background:none;border:1px solid var(–bo);color:var(–ta);padding:8px 14px;cursor:pointer;font-size:12px;font-family:‘Jost’,sans-serif}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-header{text-align:center;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(–ta);padding:6px 0}
+.cal-day{background:var(–cr);min-height:60px;padding:6px;cursor:pointer;transition:background .15s}
+.cal-day:active{background:#ede8e1}
+.cal-day.today{outline:1px solid rgba(200,169,110,0.5);background:rgba(200,169,110,0.08)}
+.cal-day.other-month{background:rgba(247,243,237,0.4)}
+.cal-day.other-month .cal-daynum{color:rgba(156,139,122,0.3)}
+.cal-daynum{font-size:12px;color:var(–ta);margin-bottom:3px}
+.cal-event{color:var(–cr);font-size:8px;padding:2px 4px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:0}
+.cal-legend{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap}
+.cal-leg-item{display:flex;align-items:center;gap:5px;font-size:9px;color:var(–ta)}
+.cal-leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* RENTABILITE */
+.rent-section{display:flex;flex-direction:column;gap:14px}
+.rent-card{background:var(–cr);padding:20px;position:relative}
+.rent-card::before{content:’’;position:absolute;inset:7px;border:1px solid rgba(200,169,110,0.12);pointer-events:none}
+.rent-title{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(–or);margin-bottom:14px}
+.rent-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(–bo)}
+.rent-row:last-child{border-bottom:none}
+.rent-label{font-size:12px;color:var(–ta)}
+.rent-val{font-family:‘Cormorant Garamond’,serif;font-size:18px;color:var(–br)}
+.rent-val.pos{color:var(–gr)}
+.rent-val.neg{color:var(–rd)}
+.rent-total{background:var(–br);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.rent-total-l{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(247,243,237,.5)}
+.rent-total-v{font-family:‘Cormorant Garamond’,serif;font-size:24px;color:var(–or);font-weight:300}
+.rent-bar-wrap{margin-top:10px}
+.rent-bar-label{display:flex;justify-content:space-between;font-size:9px;color:var(–ta);margin-bottom:5px}
+.rent-bar{height:4px;background:var(–bo)}
+.rent-bar-fill{height:100%;transition:width 1s ease}
+.upsell-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.upsell-item{background:rgba(200,169,110,0.07);padding:12px;text-align:center;border:1px solid rgba(200,169,110,0.15)}
+.upsell-nom{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(–ta)}
+.upsell-prix{font-family:‘Cormorant Garamond’,serif;font-size:22px;color:var(–or);font-weight:300;margin:3px 0}
+.upsell-nb{font-size:10px;color:var(–br)}
+
+/* BACKUP */
+.backup-section{background:var(–cr);padding:20px;margin-bottom:16px}
+.backup-title{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(–or);margin-bottom:12px}
+.backup-btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn-backup{background:var(–br);color:var(–cr);border:none;padding:10px 16px;font-family:‘Jost’,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;flex:1}
+.btn-backup.secondary{background:none;border:1px solid var(–bo);color:var(–ta)}
+.backup-code{margin-top:12px;background:var(–wh);border:1px solid var(–bo);padding:10px;font-size:10px;color:var(–ta);word-break:break-all;font-family:monospace;max-height:80px;overflow-y:auto;display:none}
+.backup-import{margin-top:10px;display:none;flex-direction:column;gap:8px}
+.backup-import textarea{background:var(–wh);border:1px solid var(–bo);padding:10px;font-size:11px;color:var(–br);font-family:monospace;width:100%;min-height:80px;resize:vertical;outline:none}
+.btn-import{background:var(–gr);color:white;border:none;padding:10px 20px;font-family:‘Jost’,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;width:100%}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(58,46,40,.7);z-index:100;display:flex;align-items:flex-end;padding:0}
+.modal{background:var(–cr);width:100%;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:env(safe-area-inset-bottom)}
+.mhd{padding:22px 20px 16px;border-bottom:1px solid var(–bo);position:sticky;top:0;background:var(–cr);z-index:1}
+.mhd-t{font-family:‘Cormorant Garamond’,serif;font-size:24px;color:var(–br)}
+.mhd-s{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(–ta);margin-top:2px}
+.mbody{padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:5px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(–ta)}
+.field input,.field select,.field textarea{background:var(–wh);border:1px solid var(–bo);padding:12px 13px;font-family:‘Jost’,sans-serif;font-size:16px;color:var(–br);outline:none;width:100%;border-radius:0;-webkit-appearance:none;appearance:none}
+.field input:focus,.field select:focus{border-color:var(–or)}
+.field textarea{resize:vertical;min-height:70px;font-size:14px}
+.field input.err{border-color:var(–rd)}
+.err-msg{font-size:9px;color:var(–rd);margin-top:2px}
+.field-hint{font-size:9px;color:var(–ta);margin-top:2px;font-style:italic}
+.cb-row{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(200,169,110,0.07);cursor:pointer}
+.cb-row input[type=checkbox]{width:18px;height:18px;accent-color:var(–or);cursor:pointer;flex-shrink:0}
+.cb-row label{font-size:14px;color:var(–br);cursor:pointer;flex:1}
+.cb-row .cp{font-family:‘Cormorant Garamond’,serif;font-size:18px;color:var(–or)}
+.tot-prev{background:var(–br);padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+.tp-l{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(247,243,237,.5)}
+.tp-s{font-size:10px;color:rgba(247,243,237,.35);margin-top:2px}
+.tp-v{font-family:‘Cormorant Garamond’,serif;font-size:26px;color:var(–or);font-weight:300}
+.benef-prev{background:rgba(74,124,89,0.1);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(74,124,89,0.2)}
+.bp-l{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(–gr)}
+.bp-v{font-family:‘Cormorant Garamond’,serif;font-size:20px;color:var(–gr);font-weight:300}
+.sec-lbl{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(–or);padding:0 0 10px;border-bottom:1px solid var(–bo)}
+.mfooter{padding:16px 20px;border-top:1px solid var(–bo);display:flex;gap:8px;position:sticky;bottom:0;background:var(–cr)}
+.btn-cancel{background:none;border:1px solid var(–bo);color:var(–ta);padding:13px 0;font-family:‘Jost’,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;flex:1}
+.btn-save{background:var(–br);color:var(–cr);border:none;padding:13px 0;font-family:‘Jost’,sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;flex:2;transition:background .2s}
+.btn-save:active{background:var(–or)}
+
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(–br);color:var(–cr);padding:10px 20px;font-size:12px;letter-spacing:1px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+@media(min-width:600px){
+.stats{grid-template-columns:repeat(4,1fr)}
+.upsell-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+
+</head>
+<body>
+
+<div class="app" id="app">
+  <div class="hd">
+    <div class="hd-mono">A<span>/</span>J</div>
+    <div class="hd-sub">Aujourd'hui — Gestion Business</div>
+    <div class="hd-line"><div class="l"></div><div class="d"></div><div class="l lr"></div></div>
+  </div>
+  <div id="content"></div>
+</div>
+
+<nav class="bottom-nav">
+  <button class="bnav-tab active" onclick="setTab('liste')" id="tab-liste">
+    <span class="bnav-icon">📋</span>Liste
+  </button>
+  <button class="bnav-tab" onclick="setTab('calendrier')" id="tab-calendrier">
+    <span class="bnav-icon">📅</span>Calendrier
+  </button>
+  <button class="bnav-tab" onclick="setTab('rentabilite')" id="tab-rentabilite">
+    <span class="bnav-icon">📊</span>Rentabilité
+  </button>
+  <button class="bnav-tab" onclick="setTab('sauvegarde')" id="tab-sauvegarde">
+    <span class="bnav-icon">💾</span>Sauvegarde
+  </button>
+</nav>
+
+<div id="modal-container"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const FORMULES = [
+  { id: "digital", label: "Full Digital", prix: 195, desc: "Galerie digitale · QR Code", tirages: 0 },
+  { id: "essentiel", label: "Essentiel", prix: 250, desc: "250 tirages 5×15 cm", tirages: 250 },
+  { id: "premium", label: "Premium", prix: 350, desc: "390 tirages + galerie digitale", tirages: 390 },
+];
+const STATUTS = [
+  { id: "confirmee", label: "Confirmée", color: "#C8A96E" },
+  { id: "acompte", label: "Acompte reçu", color: "#9C8B7A" },
+  { id: "solde", label: "Soldée", color: "#6B5B4E" },
+  { id: "terminee", label: "Terminée ✓", color: "#4a7c59" },
+  { id: "annulee", label: "Annulée", color: "#c0392b" },
+];
+const TYPES = [
+  { id: "mariage", label: "Mariage" },
+  { id: "anniversaire", label: "Anniversaire" },
+  { id: "entreprise", label: "Entreprise" },
+  { id: "autre", label: "Autre" },
+];
+const CHARGES = [
+  { label: "LumaBooth Pro", montant: 20 },
+  { label: "DNP RX1HS", montant: 90 },
+  { label: "WCM Plus + Médias", montant: 43 },
+];
+const COUT_TIRAGE = 156.9 / 1400;
+const MOIS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+const JOURS = ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+
+let reservations = [];
+let currentTab = "liste";
+let filterStatut = "all";
+let calDate = new Date();
+let editingId = null;
+let formData = {};
+
+// STORAGE
+function save() {
+  try { localStorage.setItem("aujourdhui_resa_v1", JSON.stringify(reservations)); } catch(e) {}
+}
+function load() {
+  try {
+    const d = localStorage.getItem("aujourdhui_resa_v1");
+    if (d) reservations = JSON.parse(d);
+  } catch(e) { reservations = []; }
+}
+
+// TOAST
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+// CALC
+function calcTotal(r) {
+  const base = FORMULES.find(f => f.id === r.formule)?.prix || 0;
+  return base + (r.livreDor ? 195 : 0) + Number(r.chaises || 0) + Number(r.deplacement || 0);
+}
+function calcAcompte(r) { return Math.round(calcTotal(r) * 0.3); }
+function calcBenef(r) { return calcTotal(r) - Number(r.consommables || 0) - Number(r.deplacement || 0); }
+function fmt(v) { return Number(v).toLocaleString("fr-FR"); }
+function fmtDate(d) {
+  if (!d) return "—";
+  const dt = new Date(d + "T12:00:00");
+  return dt.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+}
+function dateKey(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+
+// TAB
+function setTab(t) {
+  currentTab = t;
+  document.querySelectorAll(".bnav-tab").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-"+t)?.classList.add("active");
+  render();
+}
+
+// STATS
+function statsHTML() {
+  const actives = reservations.filter(r => r.statut !== "annulee");
+  const terminees = reservations.filter(r => r.statut === "terminee");
+  const caTotal = actives.reduce((s,r) => s+calcTotal(r), 0);
+  const caEncaisse = terminees.reduce((s,r) => s+calcTotal(r), 0);
+  const benefTotal = terminees.reduce((s,r) => s+calcBenef(r), 0);
+  const chargesMens = CHARGES.reduce((s,c) => s+c.montant, 0);
+  const panier = actives.length > 0 ? Math.round(caTotal/actives.length) : 0;
+
+  return `
+  <div class="stats">
+    <div class="stat"><div class="stat-v">${actives.length}</div><div class="stat-l">Réservations</div><div class="stat-sub">${terminees.length} terminées</div></div>
+    <div class="stat"><div class="stat-v">${fmt(caTotal)}<sup> €</sup></div><div class="stat-l">CA Prévisionnel</div><div class="stat-sub">Saison 2026</div></div>
+    <div class="stat"><div class="stat-v">${fmt(caEncaisse)}<sup> €</sup></div><div class="stat-l">CA Encaissé</div><div class="stat-sub">${terminees.length} événements</div></div>
+    <div class="stat"><div class="stat-v">${fmt(benefTotal)}<sup> €</sup></div><div class="stat-l">Bénéfice net</div><div class="stat-sub">Panier moy. ${fmt(panier)}€</div></div>
+  </div>
+  <div class="banner">
+    <div class="ban-t">Saison 2026 — Illimité</div>
+    <div class="ban-v">${actives.length} prestation${actives.length!==1?"s":""} · ${fmt(caTotal)} € CA prévisionnel</div>
+    <div class="ban-bar"><div class="ban-fill" style="width:${Math.min(100,actives.length*7)}%"></div></div>
+    <div class="ban-charges">${fmt(chargesMens)} € charges fixes / mois · 1 presta = rentable</div>
+  </div>`;
+}
+
+// LISTE
+function listeHTML() {
+  const filtered = reservations
+    .filter(r => filterStatut === "all" || r.statut === filterStatut)
+    .sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  const filters = `<div class="filter-bar">
+    <button class="filter-btn${filterStatut==='all'?' active':''}" onclick="setFilter('all')">Toutes</button>
+    ${STATUTS.map(s => `<button class="filter-btn${filterStatut===s.id?' active':''}" onclick="setFilter('${s.id}')">${s.label}</button>`).join("")}
+  </div>`;
+
+  const cards = filtered.length === 0
+    ? `<div class="empty-state">Aucune réservation — appuyez sur + pour commencer ✦</div>`
+    : filtered.map(r => {
+        const st = STATUTS.find(s => s.id === r.statut) || STATUTS[0];
+        const fm = FORMULES.find(f => f.id === r.formule);
+        const type = TYPES.find(t => t.id === r.typeEvent)?.label || "";
+        const benef = calcBenef(r);
+        return `<div class="resa">
+          <div class="resa-stripe" style="background:${st.color}"></div>
+          <div class="resa-main">
+            <div class="resa-client">${r.client}</div>
+            <div class="resa-meta">${fmtDate(r.date)}${r.lieu ? " · "+r.lieu : ""}${type ? " · "+type : ""}</div>
+            <div class="resa-tags">
+              <span class="tag tg-f">${fm?.label}</span>
+              ${r.livreDor ? '<span class="tag tg-u">📖 Livre d\'or</span>' : ""}
+              ${r.chaises>0 ? `<span class="tag tg-u">🪑 +${r.chaises}€</span>` : ""}
+              ${r.deplacement>0 ? `<span class="tag tg-u">🚗 +${r.deplacement}€</span>` : ""}
+              ${r.acompteRecu ? '<span class="tag tg-e">✓ Acompte</span>' : ""}
+            </div>
+            ${r.notes ? `<div class="resa-meta" style="margin-top:4px;font-style:italic">"${r.notes}"</div>` : ""}
+            <div class="resa-actions">
+              <button class="btn-sm" onclick="openEdit('${r.id}')">Modifier</button>
+              <button class="btn-sm" style="color:var(--rd)" onclick="delResa('${r.id}')">Supprimer</button>
+            </div>
+          </div>
+          <div class="resa-right">
+            <div class="resa-tot">${fmt(calcTotal(r))} €</div>
+            <div class="resa-benef">Bénéf. ${fmt(benef)} €</div>
+            <div class="resa-ac${r.acompteRecu?' ac-ok':''}">${r.acompteRecu ? "✓ Acompte" : `Acompte: ${fmt(calcAcompte(r))}€`}</div>
+            <div style="margin-top:4px"><span class="tag" style="background:${st.color}22;color:${st.color};font-size:8px">${st.label}</span></div>
+          </div>
+        </div>`;
+      }).join("");
+
+  return `
+  <div class="sec-hd">
+    <div class="sec-title">Réservations</div>
+    <button class="btn-add" onclick="openAdd('')">+ Nouveau</button>
+  </div>
+  ${filters}
+  <div class="list">${cards}</div>`;
+}
+
+function setFilter(f) { filterStatut = f; render(); }
+
+// CALENDAR
+function calendarHTML() {
+  const year = calDate.getFullYear();
+  const month = calDate.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month+1, 0);
+  const startDow = (firstDay.getDay()+6)%7;
+
+  const days = [];
+  for (let i=0; i<startDow; i++) days.push({ date: new Date(year, month, -startDow+i+1), current: false });
+  for (let i=1; i<=lastDay.getDate(); i++) days.push({ date: new Date(year, month, i), current: true });
+  const rem = 7-(days.length%7); if(rem<7) for(let i=1;i<=rem;i++) days.push({ date: new Date(year, month+1, i), current: false });
+
+  const today = new Date();
+  const isToday = d => d.getDate()===today.getDate() && d.getMonth()===today.getMonth() && d.getFullYear()===today.getFullYear();
+  const getResa = d => reservations.filter(r => r.date === dateKey(d));
+  const getColor = s => STATUTS.find(x => x.id === s)?.color || "#C8A96E";
+
+  const cells = days.map(d => {
+    const resa = getResa(d.date);
+    const key = dateKey(d.date);
+    return `<div class="cal-day${!d.current?" other-month":""}${isToday(d.date)?" today":""}" onclick="openAdd('${key}')">
+      <div class="cal-daynum">${d.date.getDate()}</div>
+      ${resa.map(r => `<div class="cal-event" style="background:${getColor(r.statut)}" onclick="event.stopPropagation();openEdit('${r.id}')">${r.client}</div>`).join("")}
+    </div>`;
+  }).join("");
+
+  const legend = STATUTS.map(s => `<div class="cal-leg-item"><div class="cal-leg-dot" style="background:${s.color}"></div>${s.label}</div>`).join("");
+
+  return `
+  <div class="cal-nav">
+    <button class="cal-btn" onclick="prevMonth()">← Préc.</button>
+    <div class="cal-month">${MOIS[month]} ${year}</div>
+    <button class="cal-btn" onclick="nextMonth()">Suiv. →</button>
+  </div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+    <button class="btn-add" onclick="openAdd('')">+ Nouveau</button>
+  </div>
+  <div class="cal-grid">
+    ${JOURS.map(j => `<div class="cal-header">${j}</div>`).join("")}
+    ${cells}
+  </div>
+  <div class="cal-legend">${legend}</div>`;
+}
+
+function prevMonth() { calDate = new Date(calDate.getFullYear(), calDate.getMonth()-1, 1); render(); }
+function nextMonth() { calDate = new Date(calDate.getFullYear(), calDate.getMonth()+1, 1); render(); }
+
+// RENTABILITE
+function rentHTML() {
+  const actives = reservations.filter(r => r.statut !== "annulee");
+  const terminees = reservations.filter(r => r.statut === "terminee");
+  const caTotal = actives.reduce((s,r) => s+calcTotal(r), 0);
+  const caEncaisse = terminees.reduce((s,r) => s+calcTotal(r), 0);
+  const benefTotal = terminees.reduce((s,r) => s+calcBenef(r), 0);
+  const chargesMens = CHARGES.reduce((s,c) => s+c.montant, 0);
+  const avecLivreDor = actives.filter(r => r.livreDor).length;
+  const avecChaises = actives.filter(r => r.chaises>0).length;
+  const caLivreDor = avecLivreDor * 195;
+  const caChaises = actives.reduce((s,r) => s+Number(r.chaises||0), 0);
+  const caDepl = actives.reduce((s,r) => s+Number(r.deplacement||0), 0);
+  const byFormule = FORMULES.map(f => ({
+    ...f,
+    count: actives.filter(r => r.formule===f.id).length,
+    ca: actives.filter(r => r.formule===f.id).reduce((s,r) => s+calcTotal(r), 0),
+  }));
+  const amortPct = Math.min(100, Math.round((caEncaisse/4000)*100));
+
+  return `<div class="rent-section">
+    <div class="rent-card">
+      <div class="rent-title">Chiffre d'affaires</div>
+      ${byFormule.map(f => `<div class="rent-row"><div class="rent-label">${f.label} × ${f.count}</div><div class="rent-val">${fmt(f.ca)} €</div></div>`).join("")}
+      <div class="rent-row"><div class="rent-label">📖 Livre d'or (${avecLivreDor}×)</div><div class="rent-val">${fmt(caLivreDor)} €</div></div>
+      <div class="rent-row"><div class="rent-label">🪑 Chaises Napoléon</div><div class="rent-val">${fmt(caChaises)} €</div></div>
+      <div class="rent-row"><div class="rent-label">🚗 Déplacements</div><div class="rent-val">${fmt(caDepl)} €</div></div>
+      <div class="rent-total"><div class="rent-total-l">CA Total prévisionnel</div><div class="rent-total-v">${fmt(caTotal)} €</div></div>
+    </div>
+
+    <div class="rent-card">
+      <div class="rent-title">Charges fixes mensuelles</div>
+      ${CHARGES.map(c => `<div class="rent-row"><div class="rent-label">${c.label}</div><div class="rent-val neg">−${c.montant} €</div></div>`).join("")}
+      <div class="rent-row"><div class="rent-label">Total / mois</div><div class="rent-val neg">−${fmt(chargesMens)} €</div></div>
+      <div class="rent-row"><div class="rent-label">CA Encaissé</div><div class="rent-val pos">${fmt(caEncaisse)} €</div></div>
+      <div class="rent-row"><div class="rent-label">Bénéfice net réel</div><div class="rent-val pos">${fmt(benefTotal)} €</div></div>
+      <div class="rent-total"><div class="rent-total-l">1 presta Essentiel couvre</div><div class="rent-total-v">${Math.round((250/chargesMens)*100)}% charges</div></div>
+    </div>
+
+    <div class="rent-card">
+      <div class="rent-title">Amortissement — investissement 4 000 €</div>
+      <div class="rent-row"><div class="rent-label">Investi</div><div class="rent-val neg">−4 000 €</div></div>
+      <div class="rent-row"><div class="rent-label">CA encaissé</div><div class="rent-val pos">${fmt(caEncaisse)} €</div></div>
+      <div class="rent-row"><div class="rent-label">Restant</div><div class="rent-val neg">−${fmt(Math.max(0, 4000-caEncaisse))} €</div></div>
+      <div class="rent-bar-wrap">
+        <div class="rent-bar-label"><span>Amortissement</span><span>${amortPct}%</span></div>
+        <div class="rent-bar"><div class="rent-bar-fill" style="width:${amortPct}%;background:linear-gradient(to right,var(--gr),#6abf82)"></div></div>
+      </div>
+      <div class="rent-bar-wrap">
+        <div class="rent-bar-label"><span>CA prévisionnel vs 4 000€</span><span>${Math.min(100,Math.round((caTotal/4000)*100))}%</span></div>
+        <div class="rent-bar"><div class="rent-bar-fill" style="width:${Math.min(100,(caTotal/4000)*100)}%;background:linear-gradient(to right,var(--ta),var(--or))"></div></div>
+      </div>
+    </div>
+
+    <div class="rent-card">
+      <div class="rent-title">Upsells</div>
+      <div class="upsell-grid">
+        <div class="upsell-item">
+          <div class="upsell-nom">📖 Livre d'or</div>
+          <div class="upsell-prix">${fmt(caLivreDor)} €</div>
+          <div class="upsell-nb">${avecLivreDor} prestas · taux ${actives.length>0?Math.round((avecLivreDor/actives.length)*100):0}%</div>
+        </div>
+        <div class="upsell-item">
+          <div class="upsell-nom">🪑 Chaises</div>
+          <div class="upsell-prix">${fmt(caChaises)} €</div>
+          <div class="upsell-nb">${avecChaises} prestas · taux ${actives.length>0?Math.round((avecChaises/actives.length)*100):0}%</div>
+        </div>
+        <div class="upsell-item">
+          <div class="upsell-nom">🚗 Déplacements</div>
+          <div class="upsell-prix">${fmt(caDepl)} €</div>
+          <div class="upsell-nb">${actives.filter(r=>r.deplacement>0).length} prestas</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// SAUVEGARDE
+function sauvegardeHTML() {
+  return `
+  <div class="backup-section">
+    <div class="backup-title">💾 Sauvegarde des données</div>
+    <p style="font-size:12px;color:var(--ta);margin-bottom:14px;line-height:1.6">Exporte tes réservations dans un fichier texte à sauvegarder dans tes Notes ou iCloud. Réimporte ce fichier pour retrouver tes données.</p>
+    <div class="backup-btns">
+      <button class="btn-backup" onclick="exportData()">📤 Exporter mes réservations</button>
+      <button class="btn-backup secondary" onclick="toggleImport()">📥 Importer</button>
+    </div>
+    <div class="backup-code" id="backup-code"></div>
+    <div class="backup-import" id="backup-import">
+      <textarea id="import-text" placeholder="Colle ici le code de sauvegarde exporté..."></textarea>
+
+```
+  <button class="btn-import" onclick="importData()">Importer les données</button>
+</div>
+```
+
+  </div>
+  <div class="rent-card" style="margin-top:0">
+    <div class="rent-title">Infos sauvegarde</div>
+    <div class="rent-row"><div class="rent-label">Réservations enregistrées</div><div class="rent-val">${reservations.length}</div></div>
+    <div class="rent-row"><div class="rent-label">Stockage utilisé</div><div class="rent-val">${(JSON.stringify(reservations).length/1024).toFixed(1)} Ko</div></div>
+    <div class="rent-row"><div class="rent-label">Dernière modif.</div><div class="rent-val" style="font-size:13px">${new Date().toLocaleDateString("fr-FR")}</div></div>
+  </div>`;
+}
+
+function exportData() {
+const code = btoa(unescape(encodeURIComponent(JSON.stringify(reservations))));
+const el = document.getElementById(“backup-code”);
+el.textContent = code;
+el.style.display = “block”;
+// Try native share
+if (navigator.share) {
+navigator.share({ title: “Aujourd’hui — Réservations”, text: code })
+.then(() => toast(“✓ Données partagées !”))
+.catch(() => {});
+} else {
+navigator.clipboard?.writeText(code).then(() => toast(“✓ Code copié !”)).catch(() => toast(“Code affiché ci-dessous — copiez-le manuellement”));
+}
+}
+
+function toggleImport() {
+const el = document.getElementById(“backup-import”);
+el.style.display = el.style.display === “flex” ? “none” : “flex”;
+}
+
+function importData() {
+const text = document.getElementById(“import-text”).value.trim();
+if (!text) { toast(“⚠️ Colle un code de sauvegarde”); return; }
+try {
+const data = JSON.parse(decodeURIComponent(escape(atob(text))));
+if (!Array.isArray(data)) throw new Error();
+reservations = data;
+save();
+toast(`✓ ${data.length} réservations importées !`);
+render();
+} catch(e) { toast(“⚠️ Code invalide, vérifie le contenu”); }
+}
+
+// MODAL
+function openAdd(date) {
+editingId = null;
+const fm = FORMULES.find(f => f.id === “essentiel”);
+const defaultConso = Math.round(fm.tirages * COUT_TIRAGE);
+formData = { client: “”, date: date||””, lieu: “”, formule: “essentiel”, livreDor: false, chaises: 0, deplacement: 0, consommables: defaultConso, statut: “confirmee”, acompteRecu: false, notes: “”, typeEvent: “mariage” };
+renderModal();
+}
+
+function openEdit(id) {
+editingId = id;
+const r = reservations.find(r => r.id === id);
+if (!r) return;
+formData = { …r };
+renderModal();
+}
+
+function delResa(id) {
+if (!confirm(“Supprimer cette réservation ?”)) return;
+reservations = reservations.filter(r => r.id !== id);
+save();
+toast(“✓ Supprimée”);
+render();
+}
+
+function closeModal() {
+document.getElementById(“modal-container”).innerHTML = “”;
+}
+
+function updateForm(key, val) {
+formData[key] = val;
+if (key === “formule”) {
+const f = FORMULES.find(f => f.id === val);
+formData.consommables = Math.round(f.tirages * COUT_TIRAGE);
+document.getElementById(“f-consommables”).value = formData.consommables;
+document.getElementById(“f-conso-hint”).textContent = f.tirages > 0
+? `${f.tirages} tirages × ${COUT_TIRAGE.toFixed(3)}€ = ${formData.consommables}€ estimé`
+: “Aucun tirage (Full Digital)”;
+}
+updateTotals();
+}
+
+function toggleLivreDor() {
+formData.livreDor = !formData.livreDor;
+document.getElementById(“cb-livreor”).checked = formData.livreDor;
+updateTotals();
+}
+
+function updateTotals() {
+formData.chaises = Number(document.getElementById(“f-chaises”)?.value || 0);
+formData.deplacement = Number(document.getElementById(“f-deplacement”)?.value || 0);
+formData.consommables = Number(document.getElementById(“f-consommables”)?.value || 0);
+const total = calcTotal(formData);
+const benef = calcBenef(formData);
+const el = document.getElementById(“total-display”);
+const bel = document.getElementById(“benef-display”);
+const ael = document.getElementById(“acompte-display”);
+if(el) el.textContent = fmt(total) + “ €”;
+if(bel) bel.textContent = fmt(benef) + “ €”;
+if(ael) ael.textContent = “Acompte 30% : “ + fmt(Math.round(total*0.3)) + “ €”;
+}
+
+function saveResa() {
+formData.client = document.getElementById(“f-client”)?.value?.trim() || “”;
+formData.date = document.getElementById(“f-date”)?.value || “”;
+formData.lieu = document.getElementById(“f-lieu”)?.value || “”;
+formData.notes = document.getElementById(“f-notes”)?.value || “”;
+formData.statut = document.getElementById(“f-statut”)?.value || “confirmee”;
+formData.typeEvent = document.getElementById(“f-type”)?.value || “mariage”;
+formData.chaises = Number(document.getElementById(“f-chaises”)?.value || 0);
+formData.deplacement = Number(document.getElementById(“f-deplacement”)?.value || 0);
+formData.consommables = Number(document.getElementById(“f-consommables”)?.value || 0);
+formData.acompteRecu = document.getElementById(“cb-acompte”)?.checked || false;
+
+let hasErr = false;
+if (!formData.client) { document.getElementById(“err-client”).style.display=“block”; hasErr=true; } else { document.getElementById(“err-client”).style.display=“none”; }
+if (!formData.date) { document.getElementById(“err-date”).style.display=“block”; hasErr=true; } else { document.getElementById(“err-date”).style.display=“none”; }
+if (hasErr) return;
+
+if (editingId) {
+reservations = reservations.map(r => r.id === editingId ? { …formData, id: editingId } : r);
+toast(“✓ Réservation modifiée”);
+} else {
+reservations.push({ …formData, id: Date.now().toString() });
+toast(“✓ Réservation créée”);
+}
+save();
+closeModal();
+render();
+}
+
+function renderModal() {
+const r = formData;
+const f = FORMULES.find(f => f.id === r.formule);
+const consoHint = f?.tirages > 0
+? `${f.tirages} tirages × ${COUT_TIRAGE.toFixed(3)}€ = ${Math.round(f.tirages*COUT_TIRAGE)}€ estimé`
+: “Aucun tirage (Full Digital)”;
+
+document.getElementById(“modal-container”).innerHTML = `
+
+  <div class="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mhd">
+      <div class="mhd-t">${editingId ? "Modifier" : "Nouvelle réservation"}</div>
+      <div class="mhd-s">Aujourd'hui · Photobooth & Services</div>
+    </div>
+    <div class="mbody">
+      <div class="sec-lbl">Informations client</div>
+      <div class="frow">
+        <div class="field">
+          <label>Nom du client *</label>
+          <input id="f-client" value="${r.client||""}" placeholder="Marie & Thomas" oninput="document.getElementById('err-client').style.display='none'">
+          <span id="err-client" class="err-msg" style="display:none">Champ requis</span>
+        </div>
+        <div class="field">
+          <label>Date *</label>
+          <input type="date" id="f-date" value="${r.date||""}" oninput="document.getElementById('err-date').style.display='none'">
+          <span id="err-date" class="err-msg" style="display:none">Champ requis</span>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="field">
+          <label>Lieu</label>
+          <input id="f-lieu" value="${r.lieu||""}" placeholder="Salle des fêtes...">
+        </div>
+        <div class="field">
+          <label>Type d'événement</label>
+          <select id="f-type">
+            ${TYPES.map(t => `<option value="${t.id}"${r.typeEvent===t.id?" selected":""}>${t.label}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+
+```
+  <div class="sec-lbl">Formule Photobooth</div>
+  <div class="field">
+    <label>Formule</label>
+    <select id="f-formule" onchange="updateForm('formule',this.value)">
+      ${FORMULES.map(f => `<option value="${f.id}"${r.formule===f.id?" selected":""}>${f.label} — ${f.prix}€ · ${f.desc}</option>`).join("")}
+    </select>
+  </div>
+
+  <div class="sec-lbl">Frais de déplacement</div>
+  <div class="field">
+    <label>Montant déplacement (€) — aller-retour dépose + récupération</label>
+    <input type="number" id="f-deplacement" value="${r.deplacement||0}" placeholder="Ex: 55" min="0" oninput="updateTotals()">
+    <span class="field-hint">S'ajoute au total facturé · déduit du bénéfice net</span>
+  </div>
+
+  <div class="sec-lbl">Upsells & Options</div>
+  <div class="cb-row" onclick="toggleLivreDor()">
+    <input type="checkbox" id="cb-livreor" ${r.livreDor?"checked":""}>
+    <label>📖 Livre d'or numérique</label>
+    <span class="cp">+195 €</span>
+  </div>
+  <div class="field">
+    <label>Chaises Napoléon (€)</label>
+    <input type="number" id="f-chaises" value="${r.chaises||0}" placeholder="0" min="0" oninput="updateTotals()">
+  </div>
+
+  <div class="sec-lbl">Consommables (auto)</div>
+  <div class="field">
+    <label>Médias imprimés (€) — calculé auto · modifiable</label>
+    <input type="number" id="f-consommables" value="${r.consommables||0}" placeholder="0" min="0" oninput="updateTotals()">
+    <span class="field-hint" id="f-conso-hint">${consoHint}</span>
+  </div>
+
+  <div class="tot-prev">
+    <div>
+      <div class="tp-l">Total prestation</div>
+      <div class="tp-s" id="acompte-display">Acompte 30% : ${fmt(calcAcompte(r))} €</div>
+    </div>
+    <div class="tp-v" id="total-display">${fmt(calcTotal(r))} €</div>
+  </div>
+  <div class="benef-prev">
+    <div class="bp-l">Bénéfice estimé</div>
+    <div class="bp-v" id="benef-display">${fmt(calcBenef(r))} €</div>
+  </div>
+
+  <div class="sec-lbl">Suivi & Statut</div>
+  <div class="field">
+    <label>Statut</label>
+    <select id="f-statut">
+      ${STATUTS.map(s => `<option value="${s.id}"${r.statut===s.id?" selected":""}>${s.label}</option>`).join("")}
+    </select>
+  </div>
+  <div class="cb-row" onclick="document.getElementById('cb-acompte').checked=!document.getElementById('cb-acompte').checked">
+    <input type="checkbox" id="cb-acompte" ${r.acompteRecu?"checked":""}>
+    <label>✓ Acompte reçu</label>
+  </div>
+  <div class="field">
+    <label>Notes</label>
+    <textarea id="f-notes" placeholder="Demandes spéciales...">${r.notes||""}</textarea>
+  </div>
+</div>
+<div class="mfooter">
+  <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+  <button class="btn-save" onclick="saveResa()">${editingId ? "Enregistrer" : "Créer la réservation"}</button>
+</div>
+```
+
+  </div>
+  </div>`;
+}
+
+// RENDER
+function render() {
+const c = document.getElementById(“content”);
+let html = statsHTML();
+if (currentTab === “liste”) html += listeHTML();
+else if (currentTab === “calendrier”) html += calendarHTML();
+else if (currentTab === “rentabilite”) html += rentHTML();
+else if (currentTab === “sauvegarde”) html += sauvegardeHTML();
+c.innerHTML = html;
+}
+
+// INIT
+load();
+render();
+</script>
+
+</body>
+</html>
