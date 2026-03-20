@@ -263,7 +263,8 @@ function toast(msg) {
 
 // CALC
 function calcTotal(r) {
-  const base = FORMULES.find(f => f.id === r.formule)?.prix || 0;
+  var fm = FORMULES.find(function(f) { return f.id === r.formule; });
+  var base = fm ? fm.prix : 0;
   return base + (r.livreDor ? 195 : 0) + Number(r.chaises || 0) + Number(r.deplacement || 0);
 }
 function calcAcompte(r) { return Math.round(calcTotal(r) * 0.3); }
@@ -284,8 +285,9 @@ function dateKey(d) {
 // TAB
 function setTab(t) {
   currentTab = t;
-  document.querySelectorAll(".bnav-tab").forEach(b => b.classList.remove("active"));
-  document.getElementById("tab-"+t)?.classList.add("active");
+  document.querySelectorAll(".bnav-tab").forEach(function(b) { b.classList.remove("active"); });
+  var el = document.getElementById("tab-"+t);
+  if (el) el.classList.add("active");
   render();
 }
 
@@ -763,19 +765,28 @@ document.getElementById(“modal-container”).innerHTML = `
 
 // RENDER
 function render() {
+try {
 const c = document.getElementById(“content”);
+if (!c) return;
 let html = statsHTML();
 if (currentTab === “liste”) html += listeHTML();
 else if (currentTab === “calendrier”) html += calendarHTML();
 else if (currentTab === “rentabilite”) html += rentHTML();
 else if (currentTab === “sauvegarde”) html += sauvegardeHTML();
 c.innerHTML = html;
+} catch(e) {
+document.getElementById(“content”).innerHTML = ’<div style="padding:20px;color:red;font-size:12px">Erreur: ’ + e.message + ‘</div>’;
+}
 }
 
 // INIT
 document.addEventListener(“DOMContentLoaded”, function() {
+try {
 load();
 render();
+} catch(e) {
+document.getElementById(“content”).innerHTML = ’<div style="padding:20px;color:red;font-size:12px">Init erreur: ’ + e.message + ‘</div>’;
+}
 });
 </script>
 
