@@ -183,7 +183,7 @@ body{background:var(--bg);font-family:'Jost',sans-serif;min-height:100vh;min-hei
 <div class="app" id="app">
   <div class="hd">
     <div class="hd-mono">A<span>/</span>J</div>
-    <div class="hd-sub">Aujourd'hui — Gestion Business</div>
+    <div class="hd-sub">AUJOURD&#39;HUI &mdash; GESTION BUSINESS</div>
     <div class="hd-line"><div class="l"></div><div class="d"></div><div class="l lr"></div></div>
   </div>
   <div id="content"></div>
@@ -339,7 +339,7 @@ function listeHTML() {
             <div class="resa-meta">${fmtDate(r.date)}${r.lieu ? " · "+r.lieu : ""}${type ? " · "+type : ""}</div>
             <div class="resa-tags">
               <span class="tag tg-f">${fm?.label}</span>
-              ${r.livreDor ? '<span class="tag tg-u">📖 Livre d\'or</span>' : ""}
+              ${r.livreDor ? '<span class="tag tg-u">&#128214; Livre d\'or</span>' : ""}
               ${r.chaises>0 ? `<span class="tag tg-u">🪑 +${r.chaises}€</span>` : ""}
               ${r.deplacement>0 ? `<span class="tag tg-u">🚗 +${r.deplacement}€</span>` : ""}
               ${r.acompteRecu ? '<span class="tag tg-e">✓ Acompte</span>' : ""}
@@ -773,8 +773,10 @@ c.innerHTML = html;
 }
 
 // INIT
+document.addEventListener(“DOMContentLoaded”, function() {
 load();
 render();
+});
 </script>
 
 </body>
